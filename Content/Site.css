@@ -1,0 +1,252 @@
+﻿body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f2f2f2;
+}
+
+.header {
+    background-color: #2c3e50;
+    padding: 15px 0;
+    color: white;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.container {
+    width: 90%;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.nav-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.nav-btn {
+    padding: 8px 16px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+    .nav-btn:hover {
+        background-color: #2980b9;
+    }
+
+.logout-btn {
+    background-color: #e74c3c;
+}
+
+    .logout-btn:hover {
+        background-color: #c0392b;
+    }
+
+.main-content {
+    padding: 20px;
+}
+
+.page-title {
+    text-align: center;
+    font-size: 30px;
+    color: #333;
+    margin-bottom: 30px;
+}
+
+.diet-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    justify-items: center;
+}
+
+.meal-card {
+    background-color: white;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    width: 100%;
+    max-width: 300px;
+    transition: transform 0.3s ease;
+}
+
+    .meal-card:hover {
+        transform: translateY(-10px);
+    }
+
+.meal-img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.meal-info {
+    padding: 20px;
+    text-align: center;
+}
+
+    .meal-info h3 {
+        margin: 0;
+        font-size: 20px;
+        color: #333;
+    }
+
+    .meal-info p {
+        font-size: 16px;
+        color: #555;
+    }
+
+.add-button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 10px;
+    width: 100%;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+    .add-button:hover {
+        background-color: #2980b9;
+    }
+
+.success-message {
+    display: none;
+    position: fixed;
+    top: 90%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #4CAF50;
+    color: white;
+    padding: 20px 40px;
+    border-radius: 8px;
+    font-size: 18px;
+    z-index: 9999;
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+}
+
+.form-container {
+    max-width: 600px;
+    margin: 30px auto;
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.form-title {
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 24px;
+    color: #2c3e50;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #333;
+}
+
+.form-input {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.add-button {
+    background-color: #27ae60;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+    transition: background-color 0.3s ease;
+}
+
+.add-button:hover {
+    background-color: #1e8e4a;
+}
+
+.form-footer {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.back-link {
+    text-decoration: none;
+    color: #3498db;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.back-link:hover {
+    text-decoration: underline;
+}
+
+/*edit*/
+
+
+
+.edit-form {
+    margin-top: 15px;
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+    .edit-form label {
+        display: block;
+        font-weight: 600;
+        margin: 10px 0 5px;
+        color: #333;
+    }
+
+    .edit-form .form-control {
+        width: 100%;
+        padding: 8px 10px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 14px;
+        box-sizing: border-box;
+    }
+
+.save-button {
+    margin-top: 15px;
+    background-color: #2980b9;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 5px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    display: block;
+    width: 100%;
+}
+
+    .save-button:hover {
+        background-color: #21618c;
+    }
