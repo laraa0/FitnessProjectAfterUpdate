@@ -30,7 +30,7 @@ namespace fitnessProject
                 {
                     conn.Open();
 
-                    string checkQuery = "SELECT COUNT(*) FROM Users WHERE email = @Email";
+                    string checkQuery = "SELECT COUNT(*) FROM users WHERE email = @Email";
                     MySqlCommand checkCmd = new MySqlCommand(checkQuery, conn);
                     checkCmd.Parameters.AddWithValue("@Email", userEmail);
                     int userExists = Convert.ToInt32(checkCmd.ExecuteScalar());
@@ -41,7 +41,7 @@ namespace fitnessProject
                         return;
                     }
 
-                    string query = "INSERT INTO Users (email, password, role) VALUES (@Email, @Password, @Role)";
+                    string query = "INSERT INTO users (email, password, role) VALUES (@Email, @Password, @Role)";
                     MySqlCommand cmd = new MySqlCommand(query, conn);
                     cmd.Parameters.AddWithValue("@Email", userEmail);
                     cmd.Parameters.AddWithValue("@Password", hashedPassword);

@@ -16,8 +16,9 @@ namespace fitnessProject
 
         private void LoadRoutine()
         {
-            string connectionString = "server=localhost;user id=root;password=;database=fitness_and_diet_project;";
-            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            string connStr = System.Configuration.ConfigurationManager.ConnectionStrings["FitnessDB"].ConnectionString;
+
+            using (MySqlConnection conn = new MySqlConnection(connStr))
             {
                 string query = @"
                     SELECT r.routine_id,d.diet_image, d.mealName, d.macronutrient, d.calories
@@ -42,7 +43,8 @@ namespace fitnessProject
             if (e.CommandName == "DeleteMeal")
             {
                 int routineId = Convert.ToInt32(e.CommandArgument);
-                string connStr = "server=localhost;user id=root;password=;database=fitness_and_diet_project;";
+                string connStr = System.Configuration.ConfigurationManager.ConnectionStrings["FitnessDB"].ConnectionString;
+
                 using (MySqlConnection conn = new MySqlConnection(connStr))
                 {
                     string deleteQuery = "DELETE FROM routine WHERE routine_id = @routineId";

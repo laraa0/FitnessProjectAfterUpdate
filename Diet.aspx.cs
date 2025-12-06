@@ -15,8 +15,8 @@ namespace fitnessProject
 
         private void LoadDiets()
         {
-            string connectionString = "server=localhost;user id=root;password=;database=fitness_and_diet_project;";
-            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            string connStr = System.Configuration.ConfigurationManager.ConnectionStrings["FitnessDB"].ConnectionString;
+            using (MySqlConnection conn = new MySqlConnection(connStr))
             {
                 string query = "SELECT diet_id, diet_image, mealName, macronutrient, calories FROM diet";
                 MySqlCommand cmd = new MySqlCommand(query, conn);

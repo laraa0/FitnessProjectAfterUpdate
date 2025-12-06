@@ -17,7 +17,7 @@ namespace fitnessProject
 
         protected void LoginButton_Click(object sender, EventArgs e)
         {
-            string userEmail = email.Text;
+            string userEmail = email.Text.Trim().ToLower();
             string userPassword = password.Text;
 
             string connStr = System.Configuration.ConfigurationManager.ConnectionStrings["FitnessDB"].ConnectionString;
@@ -27,7 +27,7 @@ namespace fitnessProject
                 try
                 {
                     conn.Open();
-                    string query = "SELECT user_id, password, role FROM Users WHERE email = @Email";
+                    string query = "SELECT user_id, password, role FROM users WHERE LOWER(email) = @Email";
                     MySqlCommand cmd = new MySqlCommand(query, conn);
                     cmd.Parameters.AddWithValue("@Email", userEmail);
 
@@ -35,7 +35,7 @@ namespace fitnessProject
                     {
                         if (reader.Read())
                         {
-                            string hashedPassword = reader["password"].ToString();
+                            string hashedPassword = reader["password"].ToString().Trim();
                             string role = reader["role"].ToString();
                             int userId = Convert.ToInt32(reader["user_id"]);  // Get user_id from the database
 
