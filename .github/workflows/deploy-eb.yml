@@ -7,7 +7,7 @@ on:
 
 jobs:
   deploy:
-    # Use the Windows runner, which includes IIS and MSBuild required for ASP.NET Framework
+    # Use the Windows runner, required for ASP.NET Framework/IIS builds
     runs-on: windows-latest 
 
     steps:
@@ -21,12 +21,14 @@ jobs:
 
       # 3. Restore NuGet Packages
       - name: Restore Project Dependencies
-        # Use the confirmed path to your solution file (.sln)
-        run: nuget restore **[YOUR_CORRECT_RELATIVE_PATH]\fitnessProject.sln** # 4. Build and Publish Application
+        # 🟢 FINAL CORRECTED PATH FOR SOLUTION FILE
+        # The file is in a folder named FitnessProjectAfterUpdate inside the repo root.
+        run: nuget restore **FitnessProjectAfterUpdate\fitnessProject.sln** # 4. Build and Publish Application
       - name: Publish ASP.NET Application for Deployment
         run: |
+          # 🟢 FINAL CORRECTED PATH FOR PROJECT FILE
           # Use MSBuild to compile the project and deploy the output to a 'publish' directory.
-          msbuild **[YOUR_CORRECT_RELATIVE_PATH]\fitnessProject.csproj** /p:Configuration=Release /p:DeployOnBuild=true /p:PublishProfile=Folder /p:PublishDir="${{ github.workspace }}\publish" /p:VisualStudioVersion=17.0
+          msbuild **FitnessProjectAfterUpdate\fitnessProject.csproj** /p:Configuration=Release /p:DeployOnBuild=true /p:PublishProfile=Folder /p:PublishDir="${{ github.workspace }}\publish" /p:VisualStudioVersion=17.0
           
       # 5. Configure AWS Credentials
       - name: Set Up AWS Credentials
