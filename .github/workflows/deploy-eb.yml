@@ -24,6 +24,6 @@ jobs:
 
       - name: Deploy to Elastic Beanstalk
         run: |
-          eb init fitnessProject --platform "IIS 10.0 running on 64bit Windows Server 2025/2.21.1" --region  eu-north-1
+          eb init fitnessProject --platform "64bit Windows Server 2025 v2.21.1 running IIS 10.0" --region eu-north-1
           eb use FitnessProject-env-1 
           eb deploy
