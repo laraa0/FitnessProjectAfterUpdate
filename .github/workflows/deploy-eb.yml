@@ -18,11 +18,12 @@ jobs:
       - name: Setup MSBuild and Visual Studio Tools Path
         uses: microsoft/setup-msbuild@v2
 
-      # 3. Restore NuGet Packages (Fixed with Absolute Path)
+      # 3. Restore NuGet Packages (Fixed with Join-Path)
       - name: Restore Project Dependencies
         run: |
-          # 🟢 FINAL PATH FIX: Use absolute path to guarantee correct directory change
-          $SolutionPath = "$($env:GITHUB_WORKSPACE)\FitnessProjectAfterUpdate\FitnessProjectAfterUpdate"
+          # 🟢 FINAL PATH FIX: Use Join-Path to build the correct absolute path
+          $TargetDir = "FitnessProjectAfterUpdate\FitnessProjectAfterUpdate"
+          $SolutionPath = Join-Path -Path $env:GITHUB_WORKSPACE -ChildPath $TargetDir
           
           Write-Host "Changing directory to $SolutionPath"
           cd $SolutionPath
@@ -30,11 +31,12 @@ jobs:
           # Run restore command using only the filename
           nuget restore fitnessProject.sln
 
-      # 4. Build and Publish Application (Fixed with Absolute Path)
+      # 4. Build and Publish Application (Fixed with Join-Path)
       - name: Publish ASP.NET Application for Deployment
         run: |
-          # 🟢 FINAL PATH FIX: Use absolute path to guarantee correct directory change
-          $ProjectPath = "$($env:GITHUB_WORKSPACE)\FitnessProjectAfterUpdate\FitnessProjectAfterUpdate"
+          # 🟢 FINAL PATH FIX: Use Join-Path to build the correct absolute path
+          $TargetDir = "FitnessProjectAfterUpdate\FitnessProjectAfterUpdate"
+          $ProjectPath = Join-Path -Path $env:GITHUB_WORKSPACE -ChildPath $TargetDir
           
           Write-Host "Changing directory to $ProjectPath"
           cd $ProjectPath
