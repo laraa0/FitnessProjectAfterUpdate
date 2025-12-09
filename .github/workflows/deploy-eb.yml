@@ -7,7 +7,7 @@ on:
 
 jobs:
   deploy:
-    # Essential for ASP.NET Framework
+    # Essential for ASP.NET Framework deployment
     runs-on: windows-latest 
 
     steps:
@@ -15,26 +15,24 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2. Add MSBuild to PATH (Optional but recommended for cleaner commands)
-      # This uses a public action to locate and configure the MSBuild path.
+      # 2. Configure MSBuild for Windows Runner
+      # This step locates and sets up the Visual Studio MSBuild tool.
       - name: Setup MSBuild Path
         uses: microsoft/setup-msbuild@v2
 
       # 3. Restore NuGet Packages
-      # Use the Nuget executable found on the Windows runner.
       - name: Restore NuGet Packages
-        run: nuget restore fitnessProject.sln
-        # NOTE: Replace 'YourSolutionName.sln' with your actual solution file name.
-        # If you don't have a solution file, you may need to specify the project path.
+        # 🚨 IMPORTANT: Assuming your solution file is in the C#Project directory. 
+        # Adjust if your .sln file is in the repository root or another location.
+        run: nuget restore C#Project\fitnessProject.sln 
 
       # 4. Build and Publish the ASP.NET Framework application
-      # This step uses MSBuild to compile the app and place the output into a 'publish' folder.
       - name: Publish ASP.NET Framework App
         run: |
-          # The 'msbuild' command is now available due to the 'setup-msbuild' step
-          msbuild **fitnessProject.csproj** /p:Configuration=Release /p:DeployOnBuild=true /p:PublishProfile=Folder /p:PublishDir="${{ github.workspace }}\publish" /p:VisualStudioVersion=17.0
+          # 🚨 FIX: Using the full relative path to the .csproj file:
+          msbuild **C#Project\FitnessProjectAfterUpdate\fitnessProject.csproj** /p:Configuration=Release /p:DeployOnBuild=true /p:PublishProfile=Folder /p:PublishDir="${{ github.workspace }}\publish" /p:VisualStudioVersion=17.0
           
-          # This command builds the project and puts the clean, deployable files 
+          # This command compiles the project and places the deployable files 
           # into the 'publish' folder.
 
       # 5. Configure AWS credentials
@@ -55,7 +53,7 @@ jobs:
           # Change directory to the published content
           cd ${{ github.workspace }}/publish
           
-          # Initialize EB (only needs to be run once per repo)
+          # Initialize EB (runs once)
           # Note: The platform string must be EXACTLY correct for your environment.
           eb init fitnessProject --platform "64bit Windows Server 2025 v2.21.1 running IIS 10.0" --region eu-north-1
           
