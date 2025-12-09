@@ -14,18 +14,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # 🚨 NEW DEBUG STEP INSERTED HERE 🚨
+      - name: List Repository Contents to find actual path
+        run: dir /s
+        
       # 2. Configure MSBuild for Windows Runner
       - name: Setup MSBuild Path
         uses: microsoft/setup-msbuild@v2
 
-      # 3. Restore NuGet Packages
+      # 3. Restore NuGet Packages (We know this path is still wrong, but it runs next)
       - name: Restore NuGet Packages
-        # 🎯 MOST LIKELY CORRECT PATH: Relative to the assumed repository root
-        run: nuget restore **FitnessProjectAfterUpdate\fitnessProject.sln** # 4. Build and Publish the ASP.NET Framework application
+        run: nuget restore FitnessProjectAfterUpdate\fitnessProject.sln 
+
+      # 4. Build and Publish the ASP.NET Framework application
       - name: Publish ASP.NET Framework App
         run: |
-          # 🎯 MOST LIKELY CORRECT PATH: Relative to the assumed repository root
-          msbuild **FitnessProjectAfterUpdate\fitnessProject.csproj** /p:Configuration=Release /p:DeployOnBuild=true /p:PublishProfile=Folder /p:PublishDir="${{ github.workspace }}\publish" /p:VisualStudioVersion=17.0
+          msbuild FitnessProjectAfterUpdate\fitnessProject.csproj /p:Configuration=Release /p:DeployOnBuild=true /p:PublishProfile=Folder /p:PublishDir="${{ github.workspace }}\publish" /p:VisualStudioVersion=17.0
           
       # 5. Configure AWS credentials
       - name: Configure AWS Credentials
@@ -42,7 +46,6 @@ jobs:
       # 7. Deploy the PUBLISHED folder to EB
       - name: Deploy to Elastic Beanstalk
         run: |
-          # Change directory to the published content
           cd ${{ github.workspace }}/publish
           
           eb init fitnessProject --platform "64bit Windows Server 2025 v2.21.1 running IIS 10.0" --region eu-north-1
