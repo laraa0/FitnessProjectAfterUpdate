@@ -15,15 +15,15 @@ jobs:
       - name: Set up AWS CLI
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1    # change to your region
+          aws-access-key-id: 
+          aws-secret-access-key: 
+          aws-region: eu-north-1
 
       - name: Install EB CLI
         run: pip install awsebcli
 
       - name: Deploy to Elastic Beanstalk
         run: |
-          eb init YourAppName --platform "64bit Windows Server 2019 v2.7.0 running IIS 10.0" --region us-east-1
-          eb use YourEnvironmentName
+          eb init fitnessProject --platform "IIS 10.0 running on 64bit Windows Server 2025/2.21.1" --region  eu-north-1
+          eb use FitnessProject-env-1 
           eb deploy
