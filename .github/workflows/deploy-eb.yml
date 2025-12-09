@@ -7,46 +7,37 @@ on:
 
 jobs:
   deploy:
-    runs-on: windows-latest
+    # Essential for ASP.NET Framework
+    runs-on: windows-latest 
 
     steps:
-      # Checkout the repo
+      # 1. Checkout the repo
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # --- START OF NEW/MODIFIED STEPS ---
+      # 2. Add MSBuild to PATH (Optional but recommended for cleaner commands)
+      # This uses a public action to locate and configure the MSBuild path.
+      - name: Setup MSBuild Path
+        uses: microsoft/setup-msbuild@v2
 
-      # 1. Setup .NET Core SDK
-      - name: Setup .NET Core
-        uses: actions/setup-dotnet@v3
-        with:
-          # Replace with your actual project's .NET version (e.g., '6.0.x', '7.0.x')
-          dotnet-version: '9.0.201' 
+      # 3. Restore NuGet Packages
+      # Use the Nuget executable found on the Windows runner.
+      - name: Restore NuGet Packages
+        run: nuget restore fitnessProject.sln
+        # NOTE: Replace 'YourSolutionName.sln' with your actual solution file name.
+        # If you don't have a solution file, you may need to specify the project path.
 
-      # 2. Restore project dependencies
-      - name: Restore dependencies
-        run: dotnet restore
-        # If your project/solution is not in the root, add a path:
-        # run: dotnet restore path/to/YourSolution.sln
-
-      # 3. Build the project (optional, but good practice)
-      - name: Build
-        run: dotnet build --configuration Release --no-restore
-
-      # 4. Publish the ASP.NET application
-      - name: Publish
+      # 4. Build and Publish the ASP.NET Framework application
+      # This step uses MSBuild to compile the app and place the output into a 'publish' folder.
+      - name: Publish ASP.NET Framework App
         run: |
-          dotnet publish fitnessProject.csproj --configuration Release --output ${{ github.workspace }}/publish
-          # Replace YourProjectName.csproj with the actual name of your .csproj file.
-          # The output folder is named 'publish'
+          # The 'msbuild' command is now available due to the 'setup-msbuild' step
+          msbuild **fitnessProject.csproj** /p:Configuration=Release /p:DeployOnBuild=true /p:PublishProfile=Folder /p:PublishDir="${{ github.workspace }}\publish" /p:VisualStudioVersion=17.0
+          
+          # This command builds the project and puts the clean, deployable files 
+          # into the 'publish' folder.
 
-      # 5. Navigate to the published directory
-      - name: Navigate to published directory
-        run: cd ${{ github.workspace }}/publish
-        
-      # --- END OF NEW/MODIFIED STEPS ---
-
-      # Configure AWS credentials
+      # 5. Configure AWS credentials
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -54,21 +45,22 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-north-1
 
-      # Install EB CLI
+      # 6. Install EB CLI
       - name: Install EB CLI
         run: pip install --upgrade awsebcli
 
-      # Deploy the PUBLISHED folder to EB
+      # 7. Deploy the PUBLISHED folder to EB
       - name: Deploy to Elastic Beanstalk
         run: |
-          # The EB commands should be run *from* the published folder
+          # Change directory to the published content
           cd ${{ github.workspace }}/publish
           
-          # Initialize EB once (optional if done manually, but safe to include)
+          # Initialize EB (only needs to be run once per repo)
+          # Note: The platform string must be EXACTLY correct for your environment.
           eb init fitnessProject --platform "64bit Windows Server 2025 v2.21.1 running IIS 10.0" --region eu-north-1
           
           # Use environment
           eb use FitnessProject-env-1
           
-          # Deploy the published application folder contents
+          # Deploy the contents of the 'publish' folder
           eb deploy
