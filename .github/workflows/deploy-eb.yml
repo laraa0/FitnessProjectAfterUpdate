@@ -13,15 +13,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 🚨 STEP 1: We expect this to fail, but we force it to continue 🚨
+      # 🚨 Step that we know will fail, but we force it to continue 🚨
       - name: Restore NuGet Packages (Expected to Fail)
         run: nuget restore FitnessProjectAfterUpdate\fitnessProject.sln 
-        continue-on-error: true 
+        continue-on-error: true # 👈 This is the key to proceeding
 
-      # 🚨 STEP 2: This is the crucial debug step that will succeed 🚨
+      # 🟢 CRUCIAL STEP: Lists all files
       - name: List Repository Contents to find actual path
         run: |
           Write-Host "--- FILES START ---"
-          # Get-ChildItem -Recurse is the correct PowerShell command
           Get-ChildItem -Recurse | Select-Object FullName
           Write-Host "--- FILES END ---"
