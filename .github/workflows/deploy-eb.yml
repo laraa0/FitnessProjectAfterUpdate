@@ -18,21 +18,26 @@ jobs:
       - name: Setup MSBuild and Visual Studio Tools Path
         uses: microsoft/setup-msbuild@v2
 
-      # 3. Restore NuGet Packages (Fixed with Change Directory)
+      # 3. Restore NuGet Packages (Fixed with Absolute Path)
       - name: Restore Project Dependencies
         run: |
-          echo "Changing directory to FitnessProjectAfterUpdate\FitnessProjectAfterUpdate"
-          # Change directory to the folder containing the .sln file
-          cd FitnessProjectAfterUpdate\FitnessProjectAfterUpdate
+          # 🟢 FINAL PATH FIX: Use absolute path to guarantee correct directory change
+          $SolutionPath = "$($env:GITHUB_WORKSPACE)\FitnessProjectAfterUpdate\FitnessProjectAfterUpdate"
+          
+          Write-Host "Changing directory to $SolutionPath"
+          cd $SolutionPath
+          
           # Run restore command using only the filename
           nuget restore fitnessProject.sln
 
-      # 4. Build and Publish Application (Fixed with Change Directory)
+      # 4. Build and Publish Application (Fixed with Absolute Path)
       - name: Publish ASP.NET Application for Deployment
         run: |
-          echo "Changing directory to FitnessProjectAfterUpdate\FitnessProjectAfterUpdate"
-          # Change directory to the folder containing the .csproj file
-          cd FitnessProjectAfterUpdate\FitnessProjectAfterUpdate
+          # 🟢 FINAL PATH FIX: Use absolute path to guarantee correct directory change
+          $ProjectPath = "$($env:GITHUB_WORKSPACE)\FitnessProjectAfterUpdate\FitnessProjectAfterUpdate"
+          
+          Write-Host "Changing directory to $ProjectPath"
+          cd $ProjectPath
           
           # Compiles and creates a deployable web package in the 'publish' directory.
           msbuild fitnessProject.csproj /p:Configuration=Release /p:DeployOnBuild=true /p:PublishProfile=Folder /p:PublishDir="${{ github.workspace }}\publish" /p:VisualStudioVersion=17.0
@@ -52,14 +57,11 @@ jobs:
       # 7. Deploy Published Artifact to EB Environment
       - name: Deploy to Elastic Beanstalk
         run: |
-          # The publish directory is relative to the *initial* workspace root (D:\a\...), so we navigate there
+          # The publish directory is relative to the *initial* workspace root ($GITHUB_WORKSPACE)
           cd ${{ github.workspace }}/publish
           
-          # Initialize EB application metadata
           eb init fitnessProject --platform "64bit Windows Server 2025 v2.21.1 running IIS 10.0" --region eu-north-1
           
-          # Target the specific environment
           eb use FitnessProject-env-1
           
-          # Deploy the contents of the current directory
           eb deploy
