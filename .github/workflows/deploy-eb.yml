@@ -20,12 +20,12 @@ jobs:
 
       # 3. Restore NuGet Packages
       - name: Restore NuGet Packages
-        # 🚨 FIX: Using the full relative path to the .sln file 🚨
-        run: nuget restore **C#Project\FitnessProjectAfterUpdate\fitnessProject.sln** # 4. Build and Publish the ASP.NET Framework application
+        # 🎯 MOST LIKELY CORRECT PATH: Relative to the assumed repository root
+        run: nuget restore **FitnessProjectAfterUpdate\fitnessProject.sln** # 4. Build and Publish the ASP.NET Framework application
       - name: Publish ASP.NET Framework App
         run: |
-          # 🚨 FIX: Using the full relative path to the .csproj file 🚨
-          msbuild **C#Project\FitnessProjectAfterUpdate\fitnessProject.csproj** /p:Configuration=Release /p:DeployOnBuild=true /p:PublishProfile=Folder /p:PublishDir="${{ github.workspace }}\publish" /p:VisualStudioVersion=17.0
+          # 🎯 MOST LIKELY CORRECT PATH: Relative to the assumed repository root
+          msbuild **FitnessProjectAfterUpdate\fitnessProject.csproj** /p:Configuration=Release /p:DeployOnBuild=true /p:PublishProfile=Folder /p:PublishDir="${{ github.workspace }}\publish" /p:VisualStudioVersion=17.0
           
       # 5. Configure AWS credentials
       - name: Configure AWS Credentials
