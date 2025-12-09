@@ -7,6 +7,7 @@ on:
 
 jobs:
   deploy:
+    # Use the Windows runner for ASP.NET Framework/IIS builds
     runs-on: windows-latest 
 
     steps:
@@ -14,26 +15,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 🚨 CORRECTED DEBUG STEP 🚨
-      - name: List Repository Contents to find actual path
-        # Use PowerShell command to recursively list directory contents
-        run: ls -r
-        
       # 2. Configure MSBuild for Windows Runner
       - name: Setup MSBuild Path
         uses: microsoft/setup-msbuild@v2
 
       # 3. Restore NuGet Packages
       - name: Restore NuGet Packages
-        # This path is still a placeholder. We will correct it after this run.
-        run: nuget restore FitnessProjectAfterUpdate\fitnessProject.sln 
-
-      # 4. Build and Publish the ASP.NET Framework application
+        # 🟢 FINAL CORRECTED PATH FOR SOLUTION FILE
+        run: nuget restore **FitnessProjectAfterUpdate\fitnessProject.sln** # 4. Build and Publish the ASP.NET Framework application
       - name: Publish ASP.NET Framework App
         run: |
-          # This path is still a placeholder. We will correct it after this run.
-          msbuild FitnessProjectAfterUpdate\fitnessProject.csproj /p:Configuration=Release /p:DeployOnBuild=true /p:PublishProfile=Folder /p:PublishDir="${{ github.workspace }}\publish" /p:VisualStudioVersion=17.0
+          # 🟢 FINAL CORRECTED PATH FOR PROJECT FILE
+          msbuild **FitnessProjectAfterUpdate\fitnessProject.csproj** /p:Configuration=Release /p:DeployOnBuild=true /p:PublishProfile=Folder /p:PublishDir="${{ github.workspace }}\publish" /p:VisualStudioVersion=17.0
           
+          # This command creates the clean, deployable web package in the 'publish' folder.
+
       # 5. Configure AWS credentials
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -49,6 +45,7 @@ jobs:
       # 7. Deploy the PUBLISHED folder to EB
       - name: Deploy to Elastic Beanstalk
         run: |
+          # Change directory to the published content
           cd ${{ github.workspace }}/publish
           
           eb init fitnessProject --platform "64bit Windows Server 2025 v2.21.1 running IIS 10.0" --region eu-north-1
