@@ -1,4 +1,4 @@
-name: Find Repository Root Path
+name: Deploy ASP.NET Framework App to AWS EB
 
 on:
   push:
@@ -6,21 +6,51 @@ on:
       - main
 
 jobs:
-  find_path:
+  deploy:
+    # Use the Windows runner, which includes IIS and MSBuild required for ASP.NET Framework
     runs-on: windows-latest 
 
     steps:
-      - name: Checkout code
+      # 1. Checkout Repository
+      - name: Checkout Source Code
         uses: actions/checkout@v3
 
-      # 🚨 Step that we know will fail, but we force it to continue 🚨
-      - name: Restore NuGet Packages (Expected to Fail)
-        run: nuget restore FitnessProjectAfterUpdate\fitnessProject.sln 
-        continue-on-error: true # 👈 This is the key to proceeding
+      # 2. Configure MSBuild
+      - name: Setup MSBuild and Visual Studio Tools Path
+        uses: microsoft/setup-msbuild@v2
 
-      # 🟢 CRUCIAL STEP: Lists all files
-      - name: List Repository Contents to find actual path
+      # 3. Restore NuGet Packages
+      - name: Restore Project Dependencies
+        # Use the confirmed path to your solution file (.sln)
+        run: nuget restore **[YOUR_CORRECT_RELATIVE_PATH]\fitnessProject.sln** # 4. Build and Publish Application
+      - name: Publish ASP.NET Application for Deployment
         run: |
-          Write-Host "--- FILES START ---"
-          Get-ChildItem -Recurse | Select-Object FullName
-          Write-Host "--- FILES END ---"
+          # Use MSBuild to compile the project and deploy the output to a 'publish' directory.
+          msbuild **[YOUR_CORRECT_RELATIVE_PATH]\fitnessProject.csproj** /p:Configuration=Release /p:DeployOnBuild=true /p:PublishProfile=Folder /p:PublishDir="${{ github.workspace }}\publish" /p:VisualStudioVersion=17.0
+          
+      # 5. Configure AWS Credentials
+      - name: Set Up AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-north-1 # Targeting eu-north-1 (Stockholm)
+
+      # 6. Install Elastic Beanstalk (EB) CLI
+      - name: Install EB CLI Tool
+        run: pip install --upgrade awsebcli
+
+      # 7. Deploy Published Artifact to EB Environment
+      - name: Deploy to Elastic Beanstalk
+        run: |
+          # Change directory to the clean, published artifact folder
+          cd ${{ github.workspace }}/publish
+          
+          # Initialize EB application metadata (runs once, but harmless to repeat)
+          eb init fitnessProject --platform "64bit Windows Server 2025 v2.21.1 running IIS 10.0" --region eu-north-1
+          
+          # Target the specific environment
+          eb use FitnessProject-env-1
+          
+          # Deploy the contents of the current directory (the published web package)
+          eb deploy
