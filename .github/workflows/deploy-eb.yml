@@ -7,7 +7,6 @@ on:
 
 jobs:
   deploy:
-    # Use the Windows runner, required for ASP.NET Framework/IIS builds
     runs-on: windows-latest 
 
     steps:
@@ -21,14 +20,12 @@ jobs:
 
       # 3. Restore NuGet Packages
       - name: Restore Project Dependencies
-        # 🟢 FINAL CORRECTED PATH FOR SOLUTION FILE
-        # The file is in a folder named FitnessProjectAfterUpdate inside the repo root.
-        run: nuget restore **FitnessProjectAfterUpdate\fitnessProject.sln** # 4. Build and Publish Application
+        # 🟢 FINAL PATH FIX: Using the nested path confirmed by the directory listing
+        run: nuget restore **FitnessProjectAfterUpdate\FitnessProjectAfterUpdate\fitnessProject.sln** # 4. Build and Publish Application
       - name: Publish ASP.NET Application for Deployment
         run: |
-          # 🟢 FINAL CORRECTED PATH FOR PROJECT FILE
-          # Use MSBuild to compile the project and deploy the output to a 'publish' directory.
-          msbuild **FitnessProjectAfterUpdate\fitnessProject.csproj** /p:Configuration=Release /p:DeployOnBuild=true /p:PublishProfile=Folder /p:PublishDir="${{ github.workspace }}\publish" /p:VisualStudioVersion=17.0
+          # 🟢 FINAL PATH FIX: Using the nested path confirmed by the directory listing
+          msbuild **FitnessProjectAfterUpdate\FitnessProjectAfterUpdate\fitnessProject.csproj** /p:Configuration=Release /p:DeployOnBuild=true /p:PublishProfile=Folder /p:PublishDir="${{ github.workspace }}\publish" /p:VisualStudioVersion=17.0
           
       # 5. Configure AWS Credentials
       - name: Set Up AWS Credentials
@@ -36,7 +33,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-north-1 # Targeting eu-north-1 (Stockholm)
+          aws-region: eu-north-1
 
       # 6. Install Elastic Beanstalk (EB) CLI
       - name: Install EB CLI Tool
@@ -45,14 +42,9 @@ jobs:
       # 7. Deploy Published Artifact to EB Environment
       - name: Deploy to Elastic Beanstalk
         run: |
-          # Change directory to the clean, published artifact folder
           cd ${{ github.workspace }}/publish
           
-          # Initialize EB application metadata (runs once, but harmless to repeat)
           eb init fitnessProject --platform "64bit Windows Server 2025 v2.21.1 running IIS 10.0" --region eu-north-1
-          
-          # Target the specific environment
           eb use FitnessProject-env-1
           
-          # Deploy the contents of the current directory (the published web package)
           eb deploy
