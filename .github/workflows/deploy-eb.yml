@@ -14,21 +14,24 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 🚨 NEW DEBUG STEP INSERTED HERE 🚨
+      # 🚨 CORRECTED DEBUG STEP 🚨
       - name: List Repository Contents to find actual path
-        run: dir /s
+        # Use PowerShell command to recursively list directory contents
+        run: ls -r
         
       # 2. Configure MSBuild for Windows Runner
       - name: Setup MSBuild Path
         uses: microsoft/setup-msbuild@v2
 
-      # 3. Restore NuGet Packages (We know this path is still wrong, but it runs next)
+      # 3. Restore NuGet Packages
       - name: Restore NuGet Packages
+        # This path is still a placeholder. We will correct it after this run.
         run: nuget restore FitnessProjectAfterUpdate\fitnessProject.sln 
 
       # 4. Build and Publish the ASP.NET Framework application
       - name: Publish ASP.NET Framework App
         run: |
+          # This path is still a placeholder. We will correct it after this run.
           msbuild FitnessProjectAfterUpdate\fitnessProject.csproj /p:Configuration=Release /p:DeployOnBuild=true /p:PublishProfile=Folder /p:PublishDir="${{ github.workspace }}\publish" /p:VisualStudioVersion=17.0
           
       # 5. Configure AWS credentials
