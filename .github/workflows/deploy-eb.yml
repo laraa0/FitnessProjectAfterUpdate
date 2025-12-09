@@ -1,4 +1,4 @@
-name: Deploy to AWS Elastic Beanstalk
+name: Find Repository Root Path
 
 on:
   push:
@@ -6,49 +6,22 @@ on:
       - main
 
 jobs:
-  deploy:
-    # Use the Windows runner for ASP.NET Framework/IIS builds
+  find_path:
     runs-on: windows-latest 
 
     steps:
-      # 1. Checkout the repo
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2. Configure MSBuild for Windows Runner
-      - name: Setup MSBuild Path
-        uses: microsoft/setup-msbuild@v2
+      # 🚨 STEP 1: We expect this to fail, but we force it to continue 🚨
+      - name: Restore NuGet Packages (Expected to Fail)
+        run: nuget restore FitnessProjectAfterUpdate\fitnessProject.sln 
+        continue-on-error: true 
 
-      # 3. Restore NuGet Packages
-      - name: Restore NuGet Packages
-        # 🟢 FINAL CORRECTED PATH FOR SOLUTION FILE
-        run: nuget restore **FitnessProjectAfterUpdate\fitnessProject.sln** # 4. Build and Publish the ASP.NET Framework application
-      - name: Publish ASP.NET Framework App
+      # 🚨 STEP 2: This is the crucial debug step that will succeed 🚨
+      - name: List Repository Contents to find actual path
         run: |
-          # 🟢 FINAL CORRECTED PATH FOR PROJECT FILE
-          msbuild **FitnessProjectAfterUpdate\fitnessProject.csproj** /p:Configuration=Release /p:DeployOnBuild=true /p:PublishProfile=Folder /p:PublishDir="${{ github.workspace }}\publish" /p:VisualStudioVersion=17.0
-          
-          # This command creates the clean, deployable web package in the 'publish' folder.
-
-      # 5. Configure AWS credentials
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-north-1
-
-      # 6. Install EB CLI
-      - name: Install EB CLI
-        run: pip install --upgrade awsebcli
-
-      # 7. Deploy the PUBLISHED folder to EB
-      - name: Deploy to Elastic Beanstalk
-        run: |
-          # Change directory to the published content
-          cd ${{ github.workspace }}/publish
-          
-          eb init fitnessProject --platform "64bit Windows Server 2025 v2.21.1 running IIS 10.0" --region eu-north-1
-          eb use FitnessProject-env-1
-          
-          eb deploy
+          Write-Host "--- FILES START ---"
+          # Get-ChildItem -Recurse is the correct PowerShell command
+          Get-ChildItem -Recurse | Select-Object FullName
+          Write-Host "--- FILES END ---"
