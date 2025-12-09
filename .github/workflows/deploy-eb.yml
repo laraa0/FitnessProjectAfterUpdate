@@ -3,27 +3,42 @@ name: Deploy to AWS Elastic Beanstalk
 on:
   push:
     branches:
-      - main   # or your deployment branch
+      - main  
 
 jobs:
   deploy:
     runs-on: windows-latest
 
     steps:
-      - uses: actions/checkout@v3
+      # 1️⃣ Checkout the repo
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      - name: Set up AWS CLI
+      # 2️⃣ Set up .NET SDK
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '9.0.201'  
+
+      # 3️⃣ Configure AWS credentials from GitHub Secrets
+      - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-north-1
+          aws-region: eu-north-1  
 
+      # 4️⃣ Install EB CLI
       - name: Install EB CLI
-        run: pip install awsebcli
+        run: pip install --upgrade awsebcli
 
+      # 5️⃣ Build & publish the project
+      - name: Build and publish
+        run: dotnet publish FitnessProject.csproj -c Release -o publish
+
+      # 6️⃣ Deploy published folder to EB
       - name: Deploy to Elastic Beanstalk
         run: |
           eb init fitnessProject --platform "64bit Windows Server 2025 v2.21.1 running IIS 10.0" --region eu-north-1
-          eb use FitnessProject-env-1 
-          eb deploy
+          eb use FitnessProject-env-1
+          eb deploy --staged publish
