@@ -1,29 +1,52 @@
-name: Deploy to AWS Elastic Beanstalk
+name: Deploy to Elastic Beanstalk (Windows ASP.NET)
 
 on:
   push:
     branches:
-      - main   # or your deployment branch
+      - main
 
 jobs:
-  deploy:
+  build:
     runs-on: windows-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Set up AWS CLI
-        uses: aws-actions/configure-aws-credentials@v2
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Restore NuGet packages
+        run: nuget restore fitnessProject.sln
+
+      - name: Build solution
+        run: msbuild fitnessProject.sln /p:Configuration=Release
+
+      - name: Publish project
+        run: msbuild fitnessProject.sln /p:WebPublishMethod=FileSystem /p:PublishUrl=publish/
+
+      - name: Zip published folder
+        run: powershell Compress-Archive -Path publish\* -DestinationPath app.zip -Force
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-north-1    # change to your region
+          aws-region: eu-north-1
 
-      - name: Install EB CLI
-        run: pip install awsebcli
+      - name: Upload ZIP to S3
+        run: aws s3 cp app.zip s3://fitnessproject-cf-temp-123/app.zip
 
-      - name: Deploy to Elastic Beanstalk
+      - name: Create EB Application Version
         run: |
-          eb init fitnessProject --platform "64bit Windows Server 2025 v2.21.1 running IIS 10.0" --region eu-north-1
-          eb use FitnessProject-env
-          eb deploy
+          aws elasticbeanstalk create-application-version \
+            --application-name "fitnessProject" \
+            --version-label "build-${{ github.run_number }}" \
+            --source-bundle S3Bucket="fitnessproject-cf-temp-123",S3Key="app.zip"
+
+      - name: Deploy New Version to Environment
+        run: |
+          aws elasticbeanstalk update-environment \
+            --environment-name "FitnessProject-env-1" \
+            --version-label "build-${{ github.run_number }}"
