@@ -3,61 +3,58 @@ name: Deploy ASP.NET to Elastic Beanstalk
 on:
   push:
     branches:
-      - main  # change if you deploy from another branch
+      - main  # deploy on push to main
 
 jobs:
   build-and-deploy:
     runs-on: windows-latest
 
     steps:
-    # 1️⃣ Checkout the repo
-    - name: Checkout code
-      uses: actions/checkout@v4
+    # 1️⃣ Checkout code
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
     # 2️⃣ Setup MSBuild
     - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@v2
+      uses: microsoft/setup-msbuild@v1
 
     # 3️⃣ Restore NuGet packages
     - name: Restore NuGet packages
       run: nuget restore fitnessProject.sln
 
-    # 4️⃣ Build the solution
+    # 4️⃣ Build project in Release mode
     - name: Build solution
       run: msbuild fitnessProject.sln /p:Configuration=Release
 
-    # 5️⃣ Publish the project to a folder called "publish"
+    # 5️⃣ Publish the project to a folder
     - name: Publish project
-      run: msbuild fitnessProject.sln /p:Configuration=Release /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:PublishUrl=publish
+      run: msbuild fitnessProject.sln /p:Configuration=Release /p:DeployOnBuild=true /p:WebPublishMethod=FileSystem /p:PublishDir=publish\
 
-    # 6️⃣ List files (optional, for debugging)
-    - name: List published files
-      run: dir publish
-
-    # 7️⃣ Zip the published folder
-    - name: Zip published folder
+    # 6️⃣ Zip the published folder
+    - name: Compress published folder
       run: powershell Compress-Archive -Path publish\* -DestinationPath app.zip -Force
 
-    # 8️⃣ Configure AWS credentials (store in GitHub secrets)
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v4
+    # 7️⃣ Upload to S3
+    - name: Upload to S3
+      uses: jakejarvis/s3-sync-action@v1
       with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: eu-north-1  # change if your region is different
+        args: app.zip s3://fitnessproject-cf-temp-123/
+      env:
+        AWS_S3_BUCKET: fitnessproject-cf-temp-123
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: eu-north-1
+        SOURCE_DIR: "./"
 
-    # 9️⃣ Upload ZIP to S3
-    - name: Upload zip to S3
-      run: aws s3 cp app.zip s3://fitnessproject-cf-temp-123/app.zip
-
-    # 🔟 Deploy to Elastic Beanstalk
+    # 8️⃣ Deploy to Elastic Beanstalk
     - name: Deploy to Elastic Beanstalk
-      run: |
-        aws elasticbeanstalk create-application-version \
-          --application-name "fitnessProject" \
-          --version-label "build-${{ github.run_number }}" \
-          --source-bundle S3Bucket="fitnessproject-cf-temp-123",S3Key="app.zip"
-
-        aws elasticbeanstalk update-environment \
-          --environment-name "FitnessProject-env-1" \
-          --version-label "build-${{ github.run_number }}"
+      uses: einaregilsson/beanstalk-deploy@v20
+      with:
+        aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        application_name: fitnessProject
+        environment_name: FitnessProject-env-1
+        region: eu-north-1
+        version_label: ${{ github.sha }}
+        bucket_name: fitnessproject-cf-temp-123
+        bucket_key: app.zip
