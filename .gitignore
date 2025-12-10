@@ -5,3 +5,8 @@ obj/
 *.log
 *.vs/
 App_Data/
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
