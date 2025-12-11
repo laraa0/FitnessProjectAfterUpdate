@@ -20,13 +20,13 @@ jobs:
 
     # 3. Build and publish project
     - name: Build and publish project
-      run: msbuild fitnessProject.csproj /p:Configuration=Release /p:DeployOnBuild=true /p:PublishDir=publish\
+      run: msbuild ./FitnessProjectAfterUpdate/fitnessProject.csproj /p:Configuration=Release /p:DeployOnBuild=true /p:PublishDir=./FitnessProjectAfterUpdate/publish
 
     # 4. Zip the published output
     - name: Zip published output
       run: |
-        cd publish
-        Compress-Archive -Path * -DestinationPath ../deploy/app.zip
+        cd ./FitnessProjectAfterUpdate/publish
+        Compress-Archive -Path * -DestinationPath ../../deploy/app.zip
 
     # 5. Deploy to Elastic Beanstalk
     - name: Deploy to Elastic Beanstalk
