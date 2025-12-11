@@ -3,11 +3,11 @@ name: Deploy to Elastic Beanstalk
 on:
   push:
     branches:
-      - main  # deploy only when main branch is updated
+      - main
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - name: Checkout code
@@ -20,7 +20,7 @@ jobs:
         aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         region: eu-north-1
         application_name: fitnessProject
-        environment_name: FitnessProject-env
+        environment_name: FitnessProject-env-1
         deployment_package: deploy/app.zip
         version_label: ${{ github.sha }}
         wait_for_deployment: true
