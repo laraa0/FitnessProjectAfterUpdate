@@ -10,9 +10,25 @@ jobs:
     runs-on: windows-latest
 
     steps:
+    # 1. Checkout code
     - name: Checkout code
       uses: actions/checkout@v3
 
+    # 2. Setup MSBuild (for ASP.NET Framework)
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1
+
+    # 3. Build and publish project
+    - name: Build and publish project
+      run: msbuild fitnessProject.csproj /p:Configuration=Release /p:DeployOnBuild=true /p:PublishDir=publish\
+
+    # 4. Zip the published output
+    - name: Zip published output
+      run: |
+        cd publish
+        Compress-Archive -Path * -DestinationPath ../deploy/app.zip
+
+    # 5. Deploy to Elastic Beanstalk
     - name: Deploy to Elastic Beanstalk
       uses: einaregilsson/beanstalk-deploy@v22
       with:
@@ -22,5 +38,6 @@ jobs:
         application_name: fitnessProject
         environment_name: FitnessProject-env-1
         deployment_package: deploy/app.zip
+        bucket_name: fitnessproject-cf-temp-123
         version_label: ${{ github.sha }}
         wait_for_deployment: true
