@@ -28,7 +28,7 @@ jobs:
 
     # 5. Zip the published output
     - name: Zip published output
-      run: |
+      run: | 
         cd ./publish
         Compress-Archive -Path * -DestinationPath ../deploy/app.zip
 
